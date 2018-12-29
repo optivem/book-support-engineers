@@ -1,0 +1,8 @@
+title: Optivem Repository EntityFramework (C#)
+description: Implementation of Repository and Unit of Work for Entity Framework
+google_analytics: UA-63306472-4
+show_downloads: true
+theme: jekyll-theme-cayman
+
+gems:
+  - jekyll-mentions
