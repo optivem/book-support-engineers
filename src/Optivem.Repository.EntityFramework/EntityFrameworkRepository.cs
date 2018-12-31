@@ -18,9 +18,9 @@ namespace Optivem.Repository.EntityFramework
      */
 
 
-    public class EntityFrameworkRepository<TEntity, TId, TContext> : IRepository<TEntity, TId> 
-        where TEntity : class 
+    public class EntityFrameworkRepository<TContext, TEntity, TId> : IRepository<TEntity, TId>
         where TContext : DbContext
+        where TEntity : class
     {
         private readonly TContext context;
         private readonly DbSet<TEntity> set;
@@ -177,6 +177,8 @@ namespace Optivem.Repository.EntityFramework
 
         public void Update(TEntity entity)
         {
+            set.Update(entity);
+
             // TODO: VC: Setting ModifiedDate and ModifiedBy
 
             // TODO: VC: Check this
@@ -185,7 +187,7 @@ namespace Optivem.Repository.EntityFramework
             // TODO: VC: If this does not work, then use set.Attach(entity), then set.Entry(entity).State = EntityState.Modified;
 
             // TODO: VC: This is from template
-            context.Entry(entity).State = EntityState.Modified;
+            // context.Entry(entity).State = EntityState.Modified;
         }
 
         public void UpdateRange(IEnumerable<TEntity> entities)
@@ -212,18 +214,18 @@ namespace Optivem.Repository.EntityFramework
             // TODO: VC: If this does not work, firstly check if the entry state is detached in that case attach the entity, and adter all this, call remove
         }
 
-        public bool Delete(object[] id)
+        public void Delete(object[] id)
         {
+            // TODO: VC: Construct object with id, then attach and delete
+
             var entity = GetSingleOrDefault(id);
 
             if(entity == null)
             {
-                return false;
+                return;
             }
 
             Delete(entity);
-
-            return true;
         }
 
         public void DeleteRange(IEnumerable<TEntity> entities)
@@ -231,46 +233,30 @@ namespace Optivem.Repository.EntityFramework
             set.RemoveRange(entities);
         }
 
-        public List<KeyValuePair<object[], bool>> DeleteRange(IEnumerable<object[]> ids)
+        public void DeleteRange(IEnumerable<object[]> ids)
         {
             // TODO: VC: Optimize
             // TODO: VC: Handle duplicate
 
-            var results = new List<KeyValuePair<object[], bool>>();
+            var entities = GetEntities(ids);
 
-            var entities = new List<TEntity>();
-
-            foreach(object[] id in ids)
-            {
-                // var entity = GetSingleOrDefault(id);
-                var deleted = Delete(id);
-                results.Add(new KeyValuePair<object[], bool>(id, deleted));
-            }
-
-            return results;
+            DeleteRange(entities);
         }
+
 
         public void DeleteRange(params TEntity[] entities)
         {
             set.RemoveRange(entities);
         }
 
-        public List<KeyValuePair<object[], bool>> DeleteRange(params object[][] ids)
+        public void DeleteRange(params object[][] ids)
         {
             // TODO: VC: Optimize
             // TODO: VC: Handle duplicate
 
-            var results = new List<KeyValuePair<object[], bool>>();
+            var entities = GetEntities(ids);
 
-            var entities = new List<TEntity>();
-
-            foreach (object[] id in ids)
-            {
-                var deleted = Delete(id);
-                results.Add(new KeyValuePair<object[], bool>(id, deleted));
-            }
-
-            return results;
+            DeleteRange(entities);
         }
 
         #endregion
@@ -279,28 +265,24 @@ namespace Optivem.Repository.EntityFramework
 
         public TEntity GetSingleOrDefault(TId id)
         {
-            // TODO: VC: Improve
-            return GetSingleOrDefault((object)id);
+            return set.Find(id);
         }
 
         public Task<TEntity> GetSingleOrDefaultAsync(TId id)
         {
-            // TODO: VC: Improve
-            return GetSingleOrDefaultAsync((object)id);
+            return set.FindAsync(id);
         }
 
         public void DeleteRange(IEnumerable<TId> ids)
         {
-            // TODO: VC: Improve
-            DeleteRange((IEnumerable<object[]>) ids);
+            var entities = GetEntities(ids);
+            set.RemoveRange(entities);
         }
 
         public void DeleteRange(params TId[] ids)
         {
-            // TODO: VC: Improve
-            // DeleteRange((object[][])ids);
-
-            throw new NotImplementedException();
+            var entities = GetEntities(ids);
+            set.RemoveRange(entities);
         }
 
         public bool GetExists(TId id)
@@ -363,7 +345,25 @@ namespace Optivem.Repository.EntityFramework
         {
             return GetQuery(filter, null, null, null, includes);
         }
-        
+
+
+        protected IEnumerable<TEntity> GetEntities<T>(IEnumerable<T> ids)
+        {
+            var entities = new List<TEntity>();
+
+            foreach (var id in ids)
+            {
+                var entity = GetSingleOrDefault(id);
+
+                if (entity != null)
+                {
+                    entities.Add(entity);
+                }
+            }
+
+            return entities;
+        }
+
         #endregion
     }
 }

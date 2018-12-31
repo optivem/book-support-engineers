@@ -10,11 +10,12 @@
     <PackageProjectUrl>https://opensource.optivem.com/csharp-repository-entityframework</PackageProjectUrl>
     <RepositoryUrl>https://github.com/optivem/csharp-repository-entityframework</RepositoryUrl>
     <PackageTags>generic repository; unit of work; Entity Framework Core</PackageTags>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.0" />
-    <PackageReference Include="Optivem.Repository" Version="1.0.0" />
+    <PackageReference Include="Optivem.Repository" Version="1.0.1" />
   </ItemGroup>
 
 </Project>
