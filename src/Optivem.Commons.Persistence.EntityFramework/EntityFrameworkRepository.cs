@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Optivem.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace Optivem.Repository.EntityFramework
+namespace Optivem.Commons.Persistence.EntityFramework
 {
     // TODO: VC: Bring back
 

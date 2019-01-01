@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Optivem.Repository;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Optivem.Repository.EntityFramework
+namespace Optivem.Commons.Persistence.EntityFramework
 {
     // TODO: VC: Handling case of multiple contexts? e.g. transaction across multiple contexts...
 
