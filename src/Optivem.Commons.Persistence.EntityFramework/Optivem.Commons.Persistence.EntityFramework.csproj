@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://opensource.optivem.com/csharp-commons-persistence-entityframework</PackageProjectUrl>
     <RepositoryUrl>https://github.com/optivem/csharp-commons-persistence-entityframework</RepositoryUrl>
     <PackageTags>Optivem Commons DotNetCore Persistence Database Repository UnitOfWork UOW Transactions EntityFrameworkCore</PackageTags>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
