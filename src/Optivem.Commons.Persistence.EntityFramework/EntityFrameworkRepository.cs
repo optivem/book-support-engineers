@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Optivem.Commons.Persistence.EntityFramework
 {
-    public class EntityFrameworkRepository<TContext, TEntity, TId> : IRepository<TEntity, TId>
+    public class EntityFrameworkRepository<TContext, TEntity> : IRepository<TEntity>
         where TContext : DbContext
         where TEntity : class
     {
-        private readonly TContext context;
-        private readonly DbSet<TEntity> set;
+        protected readonly TContext context;
+        protected readonly DbSet<TEntity> set;
 
         public EntityFrameworkRepository(TContext context)
         {
@@ -88,16 +88,6 @@ namespace Optivem.Commons.Persistence.EntityFramework
             return query.FirstOrDefaultAsync();
         }
 
-        public TEntity GetSingleOrDefault(params object[] id)
-        {
-            return set.Find(id);
-        }
-
-        public Task<TEntity> GetSingleOrDefaultAsync(params object[] id)
-        {
-            return set.FindAsync(id);
-        }
-
         public long GetCount(Expression<Func<TEntity, bool>> filter = null)
         {
             var query = GetQuery(filter);
@@ -115,7 +105,7 @@ namespace Optivem.Commons.Persistence.EntityFramework
             var query = GetQuery(filter);
             return query.Any();
         }
-        
+
         public Task<bool> GetExistsAsync(Expression<Func<TEntity, bool>> filter = null)
         {
             var query = GetQuery(filter);
@@ -125,7 +115,7 @@ namespace Optivem.Commons.Persistence.EntityFramework
         #endregion
 
         #region Create
-        
+
         public virtual void Add(TEntity entity)
         {
             set.Add(entity);
@@ -184,28 +174,10 @@ namespace Optivem.Commons.Persistence.EntityFramework
             set.Remove(entity);
         }
 
-        public void Delete(object[] id)
-        {
-            var entity = GetSingleOrDefault(id);
-
-            if(entity == null)
-            {
-                return;
-            }
-
-            Delete(entity);
-        }
 
         public void DeleteRange(IEnumerable<TEntity> entities)
         {
             set.RemoveRange(entities);
-        }
-
-        public void DeleteRange(IEnumerable<object[]> ids)
-        {
-            var entities = GetEntities(ids);
-
-            DeleteRange(entities);
         }
 
 
@@ -214,50 +186,12 @@ namespace Optivem.Commons.Persistence.EntityFramework
             set.RemoveRange(entities);
         }
 
-        public void DeleteRange(params object[][] ids)
-        {
-            var entities = GetEntities(ids);
-
-            DeleteRange(entities);
-        }
 
         #endregion
 
         #region Additional
 
-        public TEntity GetSingleOrDefault(TId id)
-        {
-            return set.Find(id);
-        }
 
-        public Task<TEntity> GetSingleOrDefaultAsync(TId id)
-        {
-            return set.FindAsync(id);
-        }
-
-        public void DeleteRange(IEnumerable<TId> ids)
-        {
-            var entities = GetEntities(ids);
-            set.RemoveRange(entities);
-        }
-
-        public void DeleteRange(params TId[] ids)
-        {
-            var entities = GetEntities(ids);
-            set.RemoveRange(entities);
-        }
-
-        public bool GetExists(TId id)
-        {
-            var entity = GetSingleOrDefault(id);
-            return entity != null;
-        }
-
-        public async Task<bool> GetExistsAsync(TId id)
-        {
-            var entity = await GetSingleOrDefaultAsync(id);
-            return entity != null;
-        }
 
         #endregion
 
@@ -305,14 +239,13 @@ namespace Optivem.Commons.Persistence.EntityFramework
             return GetQuery(filter, null, null, null, includes);
         }
 
-
         protected IEnumerable<TEntity> GetEntities<T>(IEnumerable<T> ids)
         {
             var entities = new List<TEntity>();
 
             foreach (var id in ids)
             {
-                var entity = GetSingleOrDefault(id);
+                var entity = GetSingleOrDefaultInner(id);
 
                 if (entity != null)
                 {
@@ -323,6 +256,132 @@ namespace Optivem.Commons.Persistence.EntityFramework
             return entities;
         }
 
+        protected TEntity GetSingleOrDefaultInner(params object[] id)
+        {
+            return set.Find(id);
+        }
+
+        protected Task<TEntity> GetSingleOrDefaultInnerAsync(params object[] id)
+        {
+            return set.FindAsync(id);
+        }
+
+        protected void DeleteInner(object[] id)
+        {
+            var entity = GetSingleOrDefaultInner(id);
+
+            if (entity == null)
+            {
+                return;
+            }
+
+            Delete(entity);
+        }
+
+        protected void DeleteRangeInner(IEnumerable<object[]> ids)
+        {
+            var entities = GetEntities(ids);
+
+            DeleteRange(entities);
+        }
+
+        protected void DeleteRangeInner(params object[][] ids)
+        {
+            var entities = GetEntities(ids);
+
+            DeleteRange(entities);
+        }
+
+
         #endregion
     }
+
+    public class EntityFrameworkRepository<TContext, TEntity, TKey> : EntityFrameworkRepository<TContext, TEntity>, IRepository<TEntity, TKey>
+        where TContext : DbContext
+        where TEntity : class
+    {
+        public EntityFrameworkRepository(TContext context) 
+            : base(context)
+        {
+        }
+
+        public TEntity GetSingleOrDefault(TKey id)
+        {
+            return GetSingleOrDefaultInner(id);
+        }
+
+        public Task<TEntity> GetSingleOrDefaultAsync(TKey id)
+        {
+            return GetSingleOrDefaultInnerAsync(id);
+        }
+
+        public void DeleteRange(IEnumerable<TKey> ids)
+        {
+            var entities = GetEntities(ids);
+            set.RemoveRange(entities);
+        }
+
+        public void DeleteRange(params TKey[] ids)
+        {
+            var entities = GetEntities(ids);
+            set.RemoveRange(entities);
+        }
+
+        public bool GetExists(TKey id)
+        {
+            var entity = GetSingleOrDefault(id);
+            return entity != null;
+        }
+
+        public async Task<bool> GetExistsAsync(TKey id)
+        {
+            var entity = await GetSingleOrDefaultAsync(id);
+            return entity != null;
+        }
+    }
+
+    public class EntityFrameworkRepository<TContext, TEntity, TKey1, TKey2> : EntityFrameworkRepository<TContext, TEntity>, IRepository<TEntity, TKey1, TKey2>
+        where TContext : DbContext
+        where TEntity : class
+    {
+        public EntityFrameworkRepository(TContext context)
+            : base(context)
+        {
+        }
+
+        public TEntity GetSingleOrDefault(TKey1 id1, TKey2 id2)
+        {
+            return GetSingleOrDefaultInner(id1, id2);
+        }
+
+        public Task<TEntity> GetSingleOrDefaultAsync(TKey1 id1, TKey2 id2)
+        {
+            return GetSingleOrDefaultInnerAsync(id1, id2);
+        }
+
+        public void DeleteRange(IEnumerable<Tuple<TKey1, TKey2>> ids)
+        {
+            var entities = GetEntities(ids);
+            set.RemoveRange(entities);
+        }
+
+        public void DeleteRange(params Tuple<TKey1, TKey2>[] ids)
+        {
+            var entities = GetEntities(ids);
+            set.RemoveRange(entities);
+        }
+
+        public bool GetExists(TKey1 id1, TKey2 id2)
+        {
+            var entity = GetSingleOrDefault(id1, id2);
+            return entity != null;
+        }
+
+        public async Task<bool> GetExistsAsync(TKey1 id1, TKey2 id2)
+        {
+            var entity = await GetSingleOrDefaultAsync(id1, id2);
+            return entity != null;
+        }
+    }
+
 }
