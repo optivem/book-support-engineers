@@ -7,17 +7,6 @@ using System.Threading.Tasks;
 
 namespace Optivem.Commons.Persistence.EntityFramework
 {
-    // TODO: VC: Bring back
-
-    /*
-     * 
-    public class EntityFrameworkRepository<TEntity, TId, TContext> : IRepository<TEntity, TId> 
-        where TEntity : class, IEntity<TId> 
-        where TContext : DbContext
-     * 
-     */
-
-
     public class EntityFrameworkRepository<TContext, TEntity, TId> : IRepository<TEntity, TId>
         where TContext : DbContext
         where TEntity : class
@@ -32,8 +21,6 @@ namespace Optivem.Commons.Persistence.EntityFramework
         }
 
         #region Read
-
-        // TODO: VC: Optimize with AsNoTracking and check any other optimizations
 
         public virtual IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
@@ -138,9 +125,7 @@ namespace Optivem.Commons.Persistence.EntityFramework
         #endregion
 
         #region Create
-
-        // TODO: VC: When adding, setting CreatedBy and CreatedDate
-
+        
         public virtual void Add(TEntity entity)
         {
             set.Add(entity);
@@ -178,21 +163,10 @@ namespace Optivem.Commons.Persistence.EntityFramework
         public void Update(TEntity entity)
         {
             set.Update(entity);
-
-            // TODO: VC: Setting ModifiedDate and ModifiedBy
-
-            // TODO: VC: Check this
-            // set.Update(entity);
-
-            // TODO: VC: If this does not work, then use set.Attach(entity), then set.Entry(entity).State = EntityState.Modified;
-
-            // TODO: VC: This is from template
-            // context.Entry(entity).State = EntityState.Modified;
         }
 
         public void UpdateRange(IEnumerable<TEntity> entities)
         {
-            // TODO: VC: Check this
             set.UpdateRange(entities);
         }
 
@@ -207,17 +181,11 @@ namespace Optivem.Commons.Persistence.EntityFramework
 
         public void Delete(TEntity entity)
         {
-            // TODO: VC: should we return bool indicating if delete was done?
-
             set.Remove(entity);
-
-            // TODO: VC: If this does not work, firstly check if the entry state is detached in that case attach the entity, and adter all this, call remove
         }
 
         public void Delete(object[] id)
         {
-            // TODO: VC: Construct object with id, then attach and delete
-
             var entity = GetSingleOrDefault(id);
 
             if(entity == null)
@@ -235,9 +203,6 @@ namespace Optivem.Commons.Persistence.EntityFramework
 
         public void DeleteRange(IEnumerable<object[]> ids)
         {
-            // TODO: VC: Optimize
-            // TODO: VC: Handle duplicate
-
             var entities = GetEntities(ids);
 
             DeleteRange(entities);
@@ -251,9 +216,6 @@ namespace Optivem.Commons.Persistence.EntityFramework
 
         public void DeleteRange(params object[][] ids)
         {
-            // TODO: VC: Optimize
-            // TODO: VC: Handle duplicate
-
             var entities = GetEntities(ids);
 
             DeleteRange(entities);
@@ -287,15 +249,12 @@ namespace Optivem.Commons.Persistence.EntityFramework
 
         public bool GetExists(TId id)
         {
-            // TODO: VC: Passing in expression for matching id, e.g. Expression<Func<TEntity, bool>> idFilter in the constructor
-            // so that we could call something like return context.Suppliers.Any(e => e.SupplierId == id);
             var entity = GetSingleOrDefault(id);
             return entity != null;
         }
 
         public async Task<bool> GetExistsAsync(TId id)
         {
-            // TODO: VC: Passing in expression for matching id, e.g. Expression<Func<TEntity, bool>> idFilter in the constructor
             var entity = await GetSingleOrDefaultAsync(id);
             return entity != null;
         }
