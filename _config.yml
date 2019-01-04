@@ -1,5 +1,5 @@
-title: Optivem C# Commons - Persistence - EntityFramework
-description: Implementation of Repository and Unit of Work for Entity Framework
+title: Optivem .NET Commons Persistence EntityFramework
+description: Implementation of generic repository and generic unit of work using EntityFramework
 google_analytics: UA-63306472-4
 show_downloads: true
 theme: jekyll-theme-cayman
