@@ -46,7 +46,7 @@ namespace Optivem.Commons.Persistence.EntityFramework
             context.Database.RollbackTransaction();
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected void Dispose(bool disposing)
         {
             if (!disposedValue)
             {

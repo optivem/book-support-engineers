@@ -22,7 +22,7 @@ namespace Optivem.Commons.Persistence.EntityFramework
 
         #region Read
 
-        public virtual IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null,
+        public IEnumerable<TEntity> Get(Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             int? skip = null, int? take = null,
             params Expression<Func<TEntity, object>>[] includes)
@@ -31,7 +31,7 @@ namespace Optivem.Commons.Persistence.EntityFramework
             return query.ToList();
         }
 
-        public virtual async Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> filter = null,
+        public async Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             int? skip = null, int? take = null,
             params Expression<Func<TEntity, object>>[] includes)
@@ -116,7 +116,7 @@ namespace Optivem.Commons.Persistence.EntityFramework
 
         #region Create
 
-        public virtual void Add(TEntity entity)
+        public void Add(TEntity entity)
         {
             set.Add(entity);
         }
@@ -189,15 +189,9 @@ namespace Optivem.Commons.Persistence.EntityFramework
 
         #endregion
 
-        #region Additional
-
-
-
-        #endregion
-
         #region Helper
 
-        protected virtual IQueryable<TEntity> GetQuery(Expression<Func<TEntity, bool>> filter = null,
+        protected IQueryable<TEntity> GetQuery(Expression<Func<TEntity, bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             int? skip = null,
             int? take = null,
@@ -233,7 +227,7 @@ namespace Optivem.Commons.Persistence.EntityFramework
             return query;
         }
 
-        protected virtual IQueryable<TEntity> GetQuery(Expression<Func<TEntity, bool>> filter = null,
+        protected IQueryable<TEntity> GetQuery(Expression<Func<TEntity, bool>> filter = null,
             params Expression<Func<TEntity, object>>[] includes)
         {
             return GetQuery(filter, null, null, null, includes);
@@ -292,7 +286,6 @@ namespace Optivem.Commons.Persistence.EntityFramework
             DeleteRange(entities);
         }
 
-
         #endregion
     }
 
@@ -305,6 +298,8 @@ namespace Optivem.Commons.Persistence.EntityFramework
         {
         }
 
+        #region Read
+
         public TEntity GetSingleOrDefault(TKey id)
         {
             return GetSingleOrDefaultInner(id);
@@ -313,18 +308,6 @@ namespace Optivem.Commons.Persistence.EntityFramework
         public Task<TEntity> GetSingleOrDefaultAsync(TKey id)
         {
             return GetSingleOrDefaultInnerAsync(id);
-        }
-
-        public void DeleteRange(IEnumerable<TKey> ids)
-        {
-            var entities = GetEntities(ids);
-            set.RemoveRange(entities);
-        }
-
-        public void DeleteRange(params TKey[] ids)
-        {
-            var entities = GetEntities(ids);
-            set.RemoveRange(entities);
         }
 
         public bool GetExists(TKey id)
@@ -338,6 +321,24 @@ namespace Optivem.Commons.Persistence.EntityFramework
             var entity = await GetSingleOrDefaultAsync(id);
             return entity != null;
         }
+
+        #endregion
+
+        #region Delete
+
+        public void DeleteRange(IEnumerable<TKey> ids)
+        {
+            var entities = GetEntities(ids);
+            set.RemoveRange(entities);
+        }
+
+        public void DeleteRange(params TKey[] ids)
+        {
+            var entities = GetEntities(ids);
+            set.RemoveRange(entities);
+        }
+
+        #endregion
     }
 
     public class EntityFrameworkRepository<TContext, TEntity, TKey1, TKey2> : EntityFrameworkRepository<TContext, TEntity>, IRepository<TEntity, TKey1, TKey2>
@@ -349,15 +350,53 @@ namespace Optivem.Commons.Persistence.EntityFramework
         {
         }
 
+        #region Read
+
         public TEntity GetSingleOrDefault(TKey1 id1, TKey2 id2)
         {
             return GetSingleOrDefaultInner(id1, id2);
+        }
+
+        public TEntity GetSingleOrDefault(Tuple<TKey1, TKey2> id)
+        {
+            return GetSingleOrDefault(id.Item1, id.Item2);
         }
 
         public Task<TEntity> GetSingleOrDefaultAsync(TKey1 id1, TKey2 id2)
         {
             return GetSingleOrDefaultInnerAsync(id1, id2);
         }
+
+        public Task<TEntity> GetSingleOrDefaultAsync(Tuple<TKey1, TKey2> id)
+        {
+            return GetSingleOrDefaultAsync(id.Item1, id.Item2);
+        }
+
+        public bool GetExists(TKey1 id1, TKey2 id2)
+        {
+            var entity = GetSingleOrDefault(id1, id2);
+            return entity != null;
+        }
+
+        public bool GetExists(Tuple<TKey1, TKey2> id)
+        {
+            return GetExists(id.Item1, id.Item2);
+        }
+
+        public async Task<bool> GetExistsAsync(TKey1 id1, TKey2 id2)
+        {
+            var entity = await GetSingleOrDefaultAsync(id1, id2);
+            return entity != null;
+        }
+
+        public Task<bool> GetExistsAsync(Tuple<TKey1, TKey2> id)
+        {
+            return GetExistsAsync(id.Item1, id.Item2);
+        }
+
+        #endregion
+
+        #region Delete
 
         public void DeleteRange(IEnumerable<Tuple<TKey1, TKey2>> ids)
         {
@@ -371,17 +410,7 @@ namespace Optivem.Commons.Persistence.EntityFramework
             set.RemoveRange(entities);
         }
 
-        public bool GetExists(TKey1 id1, TKey2 id2)
-        {
-            var entity = GetSingleOrDefault(id1, id2);
-            return entity != null;
-        }
-
-        public async Task<bool> GetExistsAsync(TKey1 id1, TKey2 id2)
-        {
-            var entity = await GetSingleOrDefaultAsync(id1, id2);
-            return entity != null;
-        }
+        #endregion
     }
 
 }
